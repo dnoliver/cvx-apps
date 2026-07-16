@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "cvx-2048.fullname" . }}-test-connection"
+  labels:
+    {{- include "cvx-2048.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "cvx-2048.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
