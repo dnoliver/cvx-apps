@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "cvx-redis.fullname" . }}-test-connection"
+  labels:
+    {{- include "cvx-redis.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: redis-ping
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      command: ['redis-cli']
+      args: ['-h', '{{ include "cvx-redis.fullname" . }}', '-p', '{{ .Values.service.port }}', 'ping']
+  restartPolicy: Never

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cvx-redis.fullname" . }}-consumer
+  labels:
+    {{- include "cvx-redis.consumerLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "cvx-redis.consumerSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "cvx-redis.consumerLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cvx-redis.serviceAccountName" . }}
+      containers:
+        - name: consumer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: REDIS_HOST
+              value: {{ include "cvx-redis.fullname" . | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.service.port | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Consuming redis at $REDIS_HOST:$REDIS_PORT"
+              until redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping; do
+                echo "waiting for redis..."; sleep 2
+              done
+              while true; do
+                hits=$(redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" INCR cvx-redis:hits)
+                echo "hit count is now $hits"
+                sleep 5
+              done
