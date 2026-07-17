@@ -4,6 +4,7 @@ metadata:
   name: {{ include "cvx-gotify.fullname" . }}
   labels:
     {{- include "cvx-gotify.labels" . | nindent 4 }}
+    networking.converix.io/vlan: {{ .Values.service.vlan }}
 spec:
   type: {{ .Values.service.type }}
   ports:
