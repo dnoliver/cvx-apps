@@ -1,0 +1,28 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cvx-hello.fullname" . }}
+  labels:
+    {{- include "cvx-hello.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cvx-hello.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # Allow from every namespace in the cluster (includes other namespaces).
+        - namespaceSelector: {}
+      {{- if eq .Values.service.type "LoadBalancer" }}
+        # LoadBalancer: also allow traffic originating from outside the cluster.
+        # 0.0.0.0/0 matches external client IPs (and node IPs when traffic is
+        # SNAT'd by externalTrafficPolicy: Cluster).
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      {{- end }}
+      ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+{{- end }}
