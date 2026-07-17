@@ -4,7 +4,7 @@ metadata:
   name: {{ include "cvx-2048.fullname" . }}
   labels:
     {{- include "cvx-2048.labels" . | nindent 4 }}
-    networking.converix.io/vlan: pax
+    networking.converix.io/vlan: {{ .Values.service.vlan }}
 spec:
   type: {{ .Values.service.type }}
   ports:
