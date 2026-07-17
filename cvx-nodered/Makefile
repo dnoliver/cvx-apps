@@ -45,7 +45,10 @@ image: $(DIST_DIR)
 	docker save --platform $(PLATFORM) -o $(DOCKER_ARCHIVE) $(IMAGE_NAME):$(IMAGE_TAG)
 
 # Package the Helm chart into a versioned .tgz under dist/.
+# Sanity-check the chart (lint + render) before packaging.
 chart: $(DIST_DIR)
+	helm lint $(CHART_DIR) --strict
+	helm template $(CHART_DIR) > /dev/null
 	helm package $(CHART_DIR) --destination $(DIST_DIR)
 
 # Remove all build artifacts.
