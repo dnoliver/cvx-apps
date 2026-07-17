@@ -52,12 +52,20 @@ securityContext: {}
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: ClusterIP
+  type: LoadBalancer
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 1880
   # VLAN to attach the LoadBalancer service to. Required when type is LoadBalancer.
   # Must be one of: crew, seatbox, pax.
-  vlan: ""
+  vlan: pax
+
+# This sets up a NetworkPolicy for ingress traffic to the pods.
+# Behaviour adapts to service.type:
+#   ClusterIP    -> allow from all namespaces in the cluster.
+#   LoadBalancer -> allow from all namespaces AND from outside the cluster.
+# See: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+networkPolicy:
+  enabled: true
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
