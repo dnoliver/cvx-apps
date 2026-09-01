@@ -11,6 +11,7 @@ spec:
       {{- include "cvx-nodered.selectorLabels" . | nindent 6 }}
   policyTypes:
     - Ingress
+    - Egress
   ingress:
     - from:
         # Allow from every namespace in the cluster (includes other namespaces).
@@ -25,4 +26,9 @@ spec:
       ports:
         - port: {{ .Values.service.port }}
           protocol: TCP
+  egress:
+    - to:
+        # Allow egress to everywhere (all IPs).
+        - ipBlock:
+            cidr: 0.0.0.0/0
 {{- end }}
