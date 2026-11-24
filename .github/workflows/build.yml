@@ -1,0 +1,55 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: make ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - cvx-2048
+          - cvx-gotify
+          - cvx-hello
+          - cvx-llamaserve
+          - cvx-nodered
+          - cvx-redis
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install yq
+        run: |
+          sudo curl -fsSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v2
+
+      - name: Enable containerd image store
+        # `docker save` must emit the hybrid format (index.json + manifest.json),
+        # which requires the containerd image store. Not enabled by default on
+        # GitHub-hosted runners.
+        run: |
+          sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+          {"features": {"containerd": true}}
+          EOF
+          sudo systemctl restart docker
+
+      - name: make
+        working-directory: ${{ matrix.app }}
+        run: make
+
+      - name: Upload dist/
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ matrix.app }}-dist
+          path: ${{ matrix.app }}/dist/
+          if-no-files-found: error
