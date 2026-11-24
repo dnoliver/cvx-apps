@@ -22,7 +22,7 @@ jobs:
           - cvx-redis
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install yq
         run: |
@@ -31,7 +31,7 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
 
       - name: Install oras
-        uses: oras-project/setup-oras@v1
+        uses: oras-project/setup-oras@v2
 
       - name: Enable containerd image store
         # `docker save` must emit the hybrid format (index.json + manifest.json),
@@ -48,7 +48,7 @@ jobs:
         run: make
 
       - name: Upload dist/
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.app }}-dist
           path: ${{ matrix.app }}/dist/
