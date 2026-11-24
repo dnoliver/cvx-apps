@@ -8,13 +8,14 @@ environments.
 
 ## Apps
 
-| App                         | Description                                               | Image                                  | Service      | Port |
-| --------------------------- | --------------------------------------------------------- | -------------------------------------- | ------------ | ---- |
-| [cvx-2048](cvx-2048/)       | 2048 puzzle game                                          | `letsbootch/argocd-game2048-app:1.0.0` | LoadBalancer | 8080 |
-| [cvx-gotify](cvx-gotify/)   | Simple server for sending and receiving push messages     | `gotify/server:2.9`                    | LoadBalancer | 80   |
-| [cvx-hello](cvx-hello/)     | Hello World / nginx starter app                           | `nginx:1.31.3`                         | LoadBalancer | 80   |
-| [cvx-nodered](cvx-nodered/) | Node-RED low-code flow programming for event-driven apps  | `nodered/node-red:5.0.1-minimal`       | LoadBalancer | 1880 |
-| [cvx-redis](cvx-redis/)     | Redis data platform for caching, vector search, and NoSQL | `redis:8.8.0-trixie`                   | ClusterIP    | 6379 |
+| App                               | Description                                                 | Image                                  | Service      | Port |
+| --------------------------------- | ----------------------------------------------------------- | -------------------------------------- | ------------ | ---- |
+| [cvx-2048](cvx-2048/)             | 2048 puzzle game                                            | `letsbootch/argocd-game2048-app:1.0.0` | LoadBalancer | 8080 |
+| [cvx-gotify](cvx-gotify/)         | Simple server for sending and receiving push messages       | `gotify/server:2.9`                    | LoadBalancer | 80   |
+| [cvx-hello](cvx-hello/)           | Hello World / nginx starter app                             | `nginx:1.31.3`                         | LoadBalancer | 80   |
+| [cvx-llamaserve](cvx-llamaserve/) | llama.cpp LLM server, serving GGUF models from Hugging Face | `ggml-org/llamacpp:server`             | LoadBalancer | 8080 |
+| [cvx-nodered](cvx-nodered/)       | Node-RED low-code flow programming for event-driven apps    | `nodered/node-red:5.0.1-minimal`       | LoadBalancer | 1880 |
+| [cvx-redis](cvx-redis/)           | Redis data platform for caching, vector search, and NoSQL   | `redis:8.8.0-trixie`                   | ClusterIP    | 6379 |
 
 All charts are currently at chart version `0.2.0`.
 
@@ -54,6 +55,12 @@ All charts share a common template set, configured through `values.yaml`:
 > `cvx-redis` additionally ships a consumer Deployment
 > (`templates/deployment-consumer.yaml`) and uses a TCP liveness probe plus a
 > `redis-cli ping` readiness probe instead of HTTP probes.
+>
+> `cvx-llamaserve` downloads and serves a GGUF model from Hugging Face at
+> startup (set via `model`, default `ggml-org/Qwen3.5-0.8B-GGUF`), with
+> `ctxSize` and `threads` for llama.cpp tuning. Its startup probe
+> (`failureThreshold: 30`, `periodSeconds: 10`) allows up to 5 minutes for model
+> loading before liveness kicks in.
 
 ## Building an offline bundle
 
